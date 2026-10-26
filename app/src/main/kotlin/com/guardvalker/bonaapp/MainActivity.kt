@@ -35,6 +35,7 @@ import android.widget.Toast
 class MainActivity : Activity() {
     private lateinit var web: WebView
     private var fileCallback: ValueCallback<Array<Uri>>? = null
+    private val updater by lazy { Updater(this) }
     private val startUrl = BuildConfig.START_URL
     private val startHost = Uri.parse(startUrl).host
 
@@ -139,7 +140,7 @@ class MainActivity : Activity() {
     }
 
     override fun onPause() { super.onPause(); web.onPause(); CookieManager.getInstance().flush() }
-    override fun onResume() { super.onResume(); web.onResume() }
+    override fun onResume() { super.onResume(); web.onResume(); updater.checkInBackground() }
 
     inner class BlobSaver {
         @JavascriptInterface

@@ -17,8 +17,8 @@ android {
     defaultConfig {
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -54,6 +54,7 @@ android {
                 resValue("color", "bar_color", color)
                 buildConfigField("String", "START_URL", "\"$url\"")
                 buildConfigField("String", "ORIENTATION", "\"$orientation\"")
+                buildConfigField("String", "APK_NAME", "\"$label.apk\"")
             }
         app("super", "bonasuper", "BonaSuper", "https://guardvalker.github.io/lista-super/", "#1e1e2e", "portrait")
         app("cuentas", "bonacuentas", "BonaCuentas", "https://guardvalker.github.io/bona-consumos/", "#1e1e2e", "portrait")
