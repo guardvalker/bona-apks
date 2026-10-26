@@ -54,12 +54,16 @@ class MainActivity : Activity() {
                     val bars = insets.getInsets(android.view.WindowInsets.Type.systemBars() or
                         android.view.WindowInsets.Type.ime() or android.view.WindowInsets.Type.displayCutout())
                     v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+                    // Consumidos: si el WebView también los recibiera, la página los sumaría de nuevo
+                    // vía env(safe-area-inset-*) y quedaría espacio vacío arriba y abajo.
+                    android.view.WindowInsets.CONSUMED
                 } else {
                     @Suppress("DEPRECATION")
                     v.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
                         insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+                    @Suppress("DEPRECATION")
+                    insets.consumeSystemWindowInsets()
                 }
-                insets
             }
         }
         setContentView(root)
