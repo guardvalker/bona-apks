@@ -118,6 +118,14 @@ class MainActivity : Activity() {
             }
         }
 
+        // Con targetSdk 36 (back predictivo) Android ya no llama a onBackPressed(): hay que registrar
+        // el callback, o "atrás" cierra la app en vez de recorrer el historial de la PWA.
+        if (Build.VERSION.SDK_INT >= 33) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) { if (web.canGoBack()) web.goBack() else finish() }
+        }
+
         if (savedInstanceState != null) web.restoreState(savedInstanceState) else web.loadUrl(startUrl)
     }
 
@@ -136,6 +144,7 @@ class MainActivity : Activity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        // Solo se usa en Android < 13; en 13+ lo maneja el callback de onCreate.
         if (web.canGoBack()) web.goBack() else super.onBackPressed()
     }
 
