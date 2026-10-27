@@ -14,7 +14,7 @@ import java.net.URL
 import java.util.concurrent.atomic.AtomicBoolean
 
 private const val RELEASES_URL = "https://api.github.com/repos/guardvalker/bona-apks/releases/latest"
-private const val CHECK_EVERY_MS = 60 * 60_000L
+private const val CHECK_EVERY_MS = 10 * 60_000L
 
 /**
  * Autoactualización: consulta el último release de GitHub y, si es más nuevo, baja el APK de esta app y lo
@@ -72,6 +72,19 @@ class Updater(context: Context) {
                         @Suppress("DEPRECATION")
                         val confirm = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
                         if (confirm != null) { ctx.startActivity(confirm.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return }
+                    }
+                    val status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)
+                    if (status == PackageInstaller.STATUS_FAILURE_BLOCKED) {
+                        // Falta el permiso "instalar apps desconocidas" para esta app: se abre su pantalla.
+                        runCatching {
+                            ctx.startActivity(
+                                Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                    android.net.Uri.parse("package:${ctx.packageName}"))
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        }
+                    } else if (status != PackageInstaller.STATUS_SUCCESS) {
+                        android.widget.Toast.makeText(ctx, "No se pudo actualizar (código $status)", android.widget.Toast.LENGTH_LONG).show()
                     }
                     busy.set(false)
                 }
