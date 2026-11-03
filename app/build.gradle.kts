@@ -17,8 +17,8 @@ android {
     defaultConfig {
         minSdk = 26
         targetSdk = 36
-        versionCode = 6
-        versionName = "1.2.0"
+        versionCode = 7
+        versionName = "1.2.1"
     }
 
     signingConfigs {
@@ -46,7 +46,7 @@ android {
     // Un flavor por app: cada una es la misma cáscara WebView apuntando a su PWA.
     flavorDimensions += "app"
     productFlavors {
-        fun app(name: String, id: String, label: String, url: String, color: String, orientation: String) =
+        fun app(name: String, id: String, label: String, url: String, color: String, orientation: String, hostIp: String = "") =
             create(name) {
                 dimension = "app"
                 applicationId = "com.guardvalker.$id"
@@ -54,6 +54,7 @@ android {
                 resValue("color", "bar_color", color)
                 buildConfigField("String", "START_URL", "\"$url\"")
                 buildConfigField("String", "ORIENTATION", "\"$orientation\"")
+                buildConfigField("String", "HOST_IP", "\"$hostIp\"")
                 buildConfigField("String", "APK_NAME", "\"$label.apk\"")
             }
         app("super", "bonasuper", "BonaSuper", "https://guardvalker.github.io/lista-super/", "#1e1e2e", "portrait")
@@ -61,7 +62,12 @@ android {
         app("gym", "bonagym", "BonaGym", "https://guardvalker.github.io/gym-app/", "#181825", "portrait")
         app("planos", "bonaplanos", "BonaPlanos", "https://guardvalker.github.io/bona-planos/", "#18222c", "any")
         // BonaChat: cliente Matrix (fork de Element Web, repo guardvalker/bonachat) servido por el servidor propio; requiere Tailscale activo.
-        app("chat", "bonachat", "BonaChat", "https://cachyos-bona.tail92d31a.ts.net/", "#11111b", "any")
+        app("chat", "bonachat", "BonaChat", "https://cachyos-bona.tail92d31a.ts.net/", "#11111b", "any", "100.123.171.20")
         app("hongolandia", "hongolandia", "Hongolandia", "https://guardvalker.github.io/hongolandia/", "#1c2433", "portrait")
     }
+}
+
+dependencies {
+    // ProxyController: el flavor chat resuelve su host sin depender del DNS de Android.
+    implementation("androidx.webkit:webkit:1.14.0")
 }

@@ -29,6 +29,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.webkit.ProxyConfig
+import androidx.webkit.ProxyController
+import androidx.webkit.WebViewFeature
 
 /**
  * Cáscara mínima: abre la PWA publicada en GitHub Pages dentro de un WebView a pantalla completa.
@@ -146,7 +149,15 @@ class MainActivity : Activity() {
             ) { if (web.canGoBack()) web.goBack() else finish() }
         }
 
-        if (savedInstanceState != null) web.restoreState(savedInstanceState) else web.loadUrl(startUrl)
+        val start = { if (savedInstanceState != null) web.restoreState(savedInstanceState) else web.loadUrl(startUrl); Unit }
+        // Apps con HOST_IP (BonaChat): el nombre solo existe en MagicDNS, que Android con DNS privado
+        // estricto no consulta. Un proxy local resuelve ese host directo a la IP de la tailnet.
+        if (BuildConfig.HOST_IP.isNotEmpty() && startHost != null &&
+            WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
+            val port = HostProxy(startHost, BuildConfig.HOST_IP).start()
+            ProxyController.getInstance().setProxyOverride(
+                ProxyConfig.Builder().addProxyRule("127.0.0.1:$port").build(), { it.run() }, start)
+        } else start()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
