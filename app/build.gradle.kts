@@ -17,8 +17,8 @@ android {
     defaultConfig {
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.1.2"
+        versionCode = 6
+        versionName = "1.2.0"
     }
 
     signingConfigs {
@@ -60,6 +60,8 @@ android {
         app("cuentas", "bonacuentas", "BonaCuentas", "https://guardvalker.github.io/bona-consumos/", "#1e1e2e", "portrait")
         app("gym", "bonagym", "BonaGym", "https://guardvalker.github.io/gym-app/", "#181825", "portrait")
         app("planos", "bonaplanos", "BonaPlanos", "https://guardvalker.github.io/bona-planos/", "#18222c", "any")
+        // BonaChat: cliente Matrix (fork de Element Web, repo guardvalker/bonachat) servido por el servidor propio; requiere Tailscale activo.
+        app("chat", "bonachat", "BonaChat", "https://cachyos-bona.tail92d31a.ts.net/", "#11111b", "any")
         app("hongolandia", "hongolandia", "Hongolandia", "https://guardvalker.github.io/hongolandia/", "#1c2433", "portrait")
     }
 }

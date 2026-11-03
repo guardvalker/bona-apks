@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Uso: scripts/release.sh 1.0.1 "notas del release"
-# Sube versionName/versionCode, compila los 5 APK firmados, hace commit+tag y publica en GitHub Releases.
+# Sube versionName/versionCode, compila los 6 APK firmados, hace commit+tag y publica en GitHub Releases.
 set -euo pipefail
 
 VERSION="${1:?uso: scripts/release.sh <version> [notas]}"
@@ -17,7 +17,7 @@ sed -i "s/versionCode = $CODE/versionCode = $((CODE + 1))/; s/versionName = \"[^
 ./gradlew :app:assembleRelease --console=plain
 
 STAGE=$(mktemp -d)
-for pair in super:BonaSuper cuentas:BonaCuentas gym:BonaGym planos:BonaPlanos hongolandia:Hongolandia; do
+for pair in super:BonaSuper cuentas:BonaCuentas gym:BonaGym planos:BonaPlanos chat:BonaChat hongolandia:Hongolandia; do
   cp "app/build/outputs/apk/${pair%%:*}/release/app-${pair%%:*}-release.apk" "$STAGE/${pair##*:}.apk"
 done
 

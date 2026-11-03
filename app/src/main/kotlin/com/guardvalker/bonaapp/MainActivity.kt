@@ -16,7 +16,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
+import android.Manifest
+import android.content.pm.PackageManager
 import android.webkit.MimeTypeMap
+import android.webkit.PermissionRequest
 import android.webkit.URLUtil
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -38,6 +41,7 @@ class MainActivity : Activity() {
     private val updater by lazy { Updater(this) }
     private val startUrl = BuildConfig.START_URL
     private val startHost = Uri.parse(startUrl).host
+    private var pendingPermission: PermissionRequest? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +98,22 @@ class MainActivity : Activity() {
             }
         }
         web.webChromeClient = object : WebChromeClient() {
+            // Cámara/micrófono (llamadas de BonaChat): solo para el host de la app, pidiendo antes el permiso de Android.
+            override fun onPermissionRequest(request: PermissionRequest) {
+                if (request.origin.host != startHost) { request.deny(); return }
+                val needed = request.resources.mapNotNull {
+                    when (it) {
+                        PermissionRequest.RESOURCE_AUDIO_CAPTURE -> Manifest.permission.RECORD_AUDIO
+                        PermissionRequest.RESOURCE_VIDEO_CAPTURE -> Manifest.permission.CAMERA
+                        else -> null
+                    }
+                }.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+                if (needed.isEmpty()) { request.grant(request.resources); return }
+                pendingPermission?.deny()
+                pendingPermission = request
+                requestPermissions(needed.toTypedArray(), REQ_PERM)
+            }
+
             override fun onShowFileChooser(
                 v: WebView, cb: ValueCallback<Array<Uri>>, params: FileChooserParams
             ): Boolean {
@@ -142,6 +162,21 @@ class MainActivity : Activity() {
         } else super.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != REQ_PERM) return
+        val req = pendingPermission ?: return
+        pendingPermission = null
+        val ok = req.resources.filter {
+            when (it) {
+                PermissionRequest.RESOURCE_AUDIO_CAPTURE -> checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                PermissionRequest.RESOURCE_VIDEO_CAPTURE -> checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+                else -> false
+            }
+        }
+        if (ok.isEmpty()) req.deny() else req.grant(ok.toTypedArray())
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         // Solo se usa en Android < 13; en 13+ lo maneja el callback de onCreate.
@@ -173,5 +208,5 @@ class MainActivity : Activity() {
         }
     }
 
-    private companion object { const val REQ_FILE = 1 }
+    private companion object { const val REQ_FILE = 1; const val REQ_PERM = 2 }
 }
