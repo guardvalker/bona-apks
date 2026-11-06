@@ -76,6 +76,7 @@ class MainActivity : Activity() {
         }
         setContentView(root)
 
+        if (BuildConfig.DEBUG) WebView.setWebContentsDebuggingEnabled(true)
         web.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true

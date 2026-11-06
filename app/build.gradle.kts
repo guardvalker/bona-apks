@@ -33,6 +33,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Convive con la release; WebView inspeccionable desde chrome://inspect.
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = false
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
